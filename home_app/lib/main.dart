@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:home_app/firebase_options.dart';
 import 'screens/home_screen.dart';
 
@@ -27,6 +28,16 @@ Future<void> main() async {
       debugPrint('[main] Firebase init failed: $e');
       debugPrint(stack.toString());
     }
+
+    // Sign in anonymously so Callable Functions accept requests from this client.
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      debugPrint('[main] Signed in anonymously');
+    } catch (e, stack) {
+      debugPrint('[main] Anonymous sign-in failed: $e');
+      debugPrint(stack.toString());
+    }
+
     runApp(const HomeApp());
   }, (error, stack) {
     debugPrint('[ZoneError] $error');
