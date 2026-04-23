@@ -32,12 +32,16 @@ class ZegoService {
   void _registerCallbacks() {
     ZegoExpressEngine.onRoomStreamUpdate =
         (roomID, updateType, streamList, extendedData) {
+      final ids = streamList.map((s) => s.streamID).toList();
+      debugPrint('[ZegoService] onRoomStreamUpdate — room: $roomID, type: $updateType, streams: $ids');
       if (updateType == ZegoUpdateType.Add) {
         for (final stream in streamList) {
+          debugPrint('[ZegoService] startPlayingStream: ${stream.streamID}');
           ZegoExpressEngine.instance.startPlayingStream(stream.streamID);
         }
       } else if (updateType == ZegoUpdateType.Delete) {
         for (final stream in streamList) {
+          debugPrint('[ZegoService] stopPlayingStream: ${stream.streamID}');
           ZegoExpressEngine.instance.stopPlayingStream(stream.streamID);
         }
       }
@@ -45,9 +49,17 @@ class ZegoService {
 
     ZegoExpressEngine.onRoomStateUpdate =
         (roomID, state, errorCode, extendedData) {
-      if (errorCode != 0) {
-        debugPrint('[ZegoService] Room state error — room: $roomID, state: $state, code: $errorCode');
-      }
+      debugPrint('[ZegoService] onRoomStateUpdate — room: $roomID, state: $state, code: $errorCode');
+    };
+
+    ZegoExpressEngine.onPublisherStateUpdate =
+        (streamID, state, errorCode, extendedData) {
+      debugPrint('[ZegoService] onPublisherStateUpdate — stream: $streamID, state: $state, code: $errorCode');
+    };
+
+    ZegoExpressEngine.onPlayerStateUpdate =
+        (streamID, state, errorCode, extendedData) {
+      debugPrint('[ZegoService] onPlayerStateUpdate — stream: $streamID, state: $state, code: $errorCode');
     };
   }
 
@@ -61,10 +73,15 @@ class ZegoService {
       final user = ZegoUser(userId, userName);
       final config = ZegoRoomConfig.defaultConfig()..isUserStatusNotify = true;
 
-      await ZegoExpressEngine.instance.loginRoom(roomId, user, config: config);
-      await ZegoExpressEngine.instance.muteMicrophone(false);
+      debugPrint('[ZegoService] loginRoom — roomId: $roomId, userId: $userId, streamId: $streamId');
+      final loginResult = await ZegoExpressEngine.instance.loginRoom(roomId, user, config: config);
+      debugPrint('[ZegoService] loginRoom result: $loginResult');
+
+      debugPrint('[ZegoService] startPublishingStream: $streamId');
       await ZegoExpressEngine.instance.startPublishingStream(streamId);
-      debugPrint('[ZegoService] Joined room: $roomId as $userId');
+
+      await ZegoExpressEngine.instance.muteMicrophone(false);
+      debugPrint('[ZegoService] mic unmuted');
     } catch (e, stack) {
       debugPrint('[ZegoService] joinRoom failed: $e');
       debugPrint(stack.toString());
