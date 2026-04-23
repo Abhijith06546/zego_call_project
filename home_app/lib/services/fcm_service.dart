@@ -65,9 +65,10 @@ class FcmService {
         debugPrint('[FcmService] FCM send failed: ${response.statusCode} ${response.body}');
       }
     } catch (e, stack) {
-      debugPrint('[FcmService] sendCallNotification error: $e');
+      // FCM HTTP calls fail on web due to CORS — the executive app's Firestore
+      // listener handles in-app call detection, so this is non-fatal.
+      debugPrint('[FcmService] sendCallNotification error (non-fatal): $e');
       debugPrint(stack.toString());
-      rethrow;
     }
   }
 }
