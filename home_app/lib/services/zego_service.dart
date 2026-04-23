@@ -1,7 +1,6 @@
-import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:zego_express_engine/zego_express_engine.dart';
 import '../constants.dart';
-import '../utils/zego_token_helper.dart';
 
 class ZegoService {
   static ZegoService? _instance;
@@ -17,7 +16,7 @@ class ZegoService {
         ZegoEngineProfile(
           ZegoConstants.appId,
           ZegoScenario.StandardVoiceCall,
-          appSign: kIsWeb ? null : ZegoConstants.appSign,
+          appSign: ZegoConstants.appSign,
         ),
       );
       _engineCreated = true;
@@ -73,15 +72,6 @@ class ZegoService {
     try {
       final user = ZegoUser(userId, userName);
       final config = ZegoRoomConfig.defaultConfig()..isUserStatusNotify = true;
-
-      if (kIsWeb) {
-        config.token = ZegoTokenHelper.generateToken04(
-          appId: ZegoConstants.appId,
-          userId: userId,
-          appSign: ZegoConstants.appSign,
-        );
-        debugPrint('[ZegoService] Web token generated for userId: $userId');
-      }
 
       debugPrint('[ZegoService] loginRoom — roomId: $roomId, userId: $userId, streamId: $streamId');
       final loginResult = await ZegoExpressEngine.instance.loginRoom(roomId, user, config: config);
