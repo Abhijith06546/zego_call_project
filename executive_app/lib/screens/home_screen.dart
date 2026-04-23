@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../services/signaling_service.dart';
 import '../models/call_model.dart';
 import 'incoming_call_screen.dart';
@@ -20,8 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _requestMicPermission();
     _registerFcm();
     _listenForCalls();
+  }
+
+  Future<void> _requestMicPermission() async {
+    final status = await Permission.microphone.request();
+    debugPrint('[HomeScreen] Microphone permission: $status');
   }
 
   Future<void> _registerFcm() async {

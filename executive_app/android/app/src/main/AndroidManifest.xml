@@ -2,6 +2,7 @@
 
     <!-- ZEGOCLOUD: microphone for voice calls -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <!-- ZEGOCLOUD: camera for optional video -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <!-- Network -->
