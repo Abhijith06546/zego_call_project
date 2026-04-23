@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Anyone can read/write calls (prototype only — lock down in production)
+    match /calls/{callId} {
+      allow read, write: if true;
+    }
+    // Executive registration
+    match /executives/{execId} {
+      allow read, write: if true;
+    }
+  }
+}

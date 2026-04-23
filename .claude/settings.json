@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb -s emulator-5554 shell \"df /data/user/0\")",
+      "Bash(adb -s emulator-5554 install -r \"d:/zego_call_project/executive_app/build/app/outputs/flutter-apk/app-debug.apk\")",
+      "Bash(adb -s emulator-5554 shell \"monkey -p com.example.executive_app -c android.intent.category.LAUNCHER 1\")",
+      "Bash(adb -s emulator-5554 shell pidof com.example.executive_app)",
+      "Bash(adb -s emulator-5554 shell \"logcat -d -t 50 --pid=$\\(adb -s emulator-5554 shell pidof com.example.executive_app\\)\")",
+      "Read(//c/Users/ABHIJITH/.gradle/caches/8.12/**)",
+      "Bash(adb -s R5CR30AJGHF install -r \"d:/zego_call_project/executive_app/build/app/outputs/flutter-apk/app-debug.apk\")",
+      "Bash(./gradlew --stop)",
+      "Bash(taskkill /F /IM java.exe)",
+      "Bash(flutter clean *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\ABHIJITH\\.gradle\\caches\\8.12"
+    ]
+  }
+}

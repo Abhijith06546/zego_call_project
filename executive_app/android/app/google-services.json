@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "671135823773",
+    "project_id": "zegotest",
+    "storage_bucket": "zegotest.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671135823773:android:fbb00cbeeeac893405e174",
+        "android_client_info": {
+          "package_name": "com.example.callfriendzego"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS0zb_afo6hxjsRilnrw9ORkMDOkqTds8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671135823773:android:bbacc3c5eea5815b05e174",
+        "android_client_info": {
+          "package_name": "com.example.executive_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS0zb_afo6hxjsRilnrw9ORkMDOkqTds8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671135823773:android:1578d58f334670d805e174",
+        "android_client_info": {
+          "package_name": "com.zegocloud.zegouikit.example.prebuiltcall"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS0zb_afo6hxjsRilnrw9ORkMDOkqTds8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
