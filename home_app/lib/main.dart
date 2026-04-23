@@ -6,8 +6,6 @@ import 'package:home_app/firebase_options.dart';
 import 'screens/home_screen.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   FlutterError.onError = (details) {
     debugPrint('[FlutterError] ${details.exceptionAsString()}');
     debugPrint(details.stack.toString());
@@ -19,7 +17,10 @@ Future<void> main() async {
     return true;
   };
 
+  // ensureInitialized must be in the same zone as runApp.
   await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
     try {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     } catch (e, stack) {

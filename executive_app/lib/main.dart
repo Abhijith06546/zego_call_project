@@ -106,8 +106,6 @@ void _onNotificationTap(NotificationResponse response) {
 }
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   FlutterError.onError = (details) {
     debugPrint('[FlutterError] ${details.exceptionAsString()}');
     debugPrint(details.stack.toString());
@@ -119,7 +117,11 @@ Future<void> main() async {
     return true;
   };
 
+  // ensureInitialized must be called in the same zone as runApp to avoid
+  // the "Zone mismatch" warning from Flutter's binding debug check.
   await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
     try {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     } catch (e, stack) {
