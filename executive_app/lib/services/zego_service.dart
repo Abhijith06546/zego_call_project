@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
 import '../constants.dart';
 
@@ -10,17 +11,22 @@ class ZegoService {
 
   Future<void> initEngine() async {
     if (_engineCreated) return;
-
-    await ZegoExpressEngine.createEngineWithProfile(
-      ZegoEngineProfile(
-        ZegoConstants.appId,
-        ZegoScenario.StandardVoiceCall,
-        appSign: ZegoConstants.appSign,
-      ),
-    );
-
-    _engineCreated = true;
-    _registerCallbacks();
+    try {
+      await ZegoExpressEngine.createEngineWithProfile(
+        ZegoEngineProfile(
+          ZegoConstants.appId,
+          ZegoScenario.StandardVoiceCall,
+          appSign: ZegoConstants.appSign,
+        ),
+      );
+      _engineCreated = true;
+      _registerCallbacks();
+      debugPrint('[ZegoService] Engine initialized');
+    } catch (e, stack) {
+      debugPrint('[ZegoService] initEngine failed: $e');
+      debugPrint(stack.toString());
+      rethrow;
+    }
   }
 
   void _registerCallbacks() {
@@ -39,7 +45,9 @@ class ZegoService {
 
     ZegoExpressEngine.onRoomStateUpdate =
         (roomID, state, errorCode, extendedData) {
-      // Room connection state changes
+      if (errorCode != 0) {
+        debugPrint('[ZegoService] Room state error — room: $roomID, state: $state, code: $errorCode');
+      }
     };
   }
 
@@ -49,27 +57,51 @@ class ZegoService {
     required String userName,
     required String streamId,
   }) async {
-    final user = ZegoUser(userId, userName);
-    final config = ZegoRoomConfig.defaultConfig()..isUserStatusNotify = true;
+    try {
+      final user = ZegoUser(userId, userName);
+      final config = ZegoRoomConfig.defaultConfig()..isUserStatusNotify = true;
 
-    await ZegoExpressEngine.instance.loginRoom(roomId, user, config: config);
-    await ZegoExpressEngine.instance.muteMicrophone(false);
-    await ZegoExpressEngine.instance.startPublishingStream(streamId);
+      await ZegoExpressEngine.instance.loginRoom(roomId, user, config: config);
+      await ZegoExpressEngine.instance.muteMicrophone(false);
+      await ZegoExpressEngine.instance.startPublishingStream(streamId);
+      debugPrint('[ZegoService] Joined room: $roomId as $userId');
+    } catch (e, stack) {
+      debugPrint('[ZegoService] joinRoom failed: $e');
+      debugPrint(stack.toString());
+      rethrow;
+    }
   }
 
   Future<void> leaveRoom(String roomId, String streamId) async {
-    await ZegoExpressEngine.instance.stopPublishingStream();
-    await ZegoExpressEngine.instance.logoutRoom(roomId);
+    try {
+      await ZegoExpressEngine.instance.stopPublishingStream();
+      await ZegoExpressEngine.instance.logoutRoom(roomId);
+      debugPrint('[ZegoService] Left room: $roomId');
+    } catch (e, stack) {
+      debugPrint('[ZegoService] leaveRoom failed: $e');
+      debugPrint(stack.toString());
+    }
   }
 
   Future<void> toggleMic(bool muted) async {
-    await ZegoExpressEngine.instance.muteMicrophone(muted);
+    try {
+      await ZegoExpressEngine.instance.muteMicrophone(muted);
+    } catch (e, stack) {
+      debugPrint('[ZegoService] toggleMic failed: $e');
+      debugPrint(stack.toString());
+    }
   }
 
   Future<void> destroy() async {
     if (_engineCreated) {
-      await ZegoExpressEngine.destroyEngine();
-      _engineCreated = false;
+      try {
+        await ZegoExpressEngine.destroyEngine();
+        _engineCreated = false;
+        debugPrint('[ZegoService] Engine destroyed');
+      } catch (e, stack) {
+        debugPrint('[ZegoService] destroy failed: $e');
+        debugPrint(stack.toString());
+      }
     }
   }
 }

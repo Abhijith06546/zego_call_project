@@ -30,12 +30,18 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   Future<void> _joinRoom() async {
-    await ZegoService.instance.joinRoom(
-      roomId: widget.call.roomId,
-      userId: ZegoConstants.executiveId,
-      userName: ZegoConstants.executiveName,
-      streamId: ZegoConstants.executiveStreamId(widget.call.roomId),
-    );
+    try {
+      await ZegoService.instance.joinRoom(
+        roomId: widget.call.roomId,
+        userId: ZegoConstants.executiveId,
+        userName: ZegoConstants.executiveName,
+        streamId: ZegoConstants.executiveStreamId(widget.call.roomId),
+      );
+    } catch (e, stack) {
+      debugPrint('[CallScreen] _joinRoom failed: $e');
+      debugPrint(stack.toString());
+      return;
+    }
 
     _timer = Timer.periodic(
       const Duration(seconds: 1),
@@ -44,24 +50,33 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   void _watchStatus() {
-    _statusSub =
-        _signaling.watchCallStatus(widget.call.callId).listen((status) {
-      if (!mounted) return;
-      if (status == 'ended') _hangUp(callerEnded: true);
-    });
+    _statusSub = _signaling.watchCallStatus(widget.call.callId).listen(
+      (status) {
+        if (!mounted) return;
+        if (status == 'ended') _hangUp(callerEnded: true);
+      },
+      onError: (e, stack) {
+        debugPrint('[CallScreen] watchCallStatus error: $e');
+        debugPrint(stack.toString());
+      },
+    );
   }
 
   Future<void> _hangUp({bool callerEnded = false}) async {
     _statusSub?.cancel();
     _timer?.cancel();
 
-    await ZegoService.instance.leaveRoom(
-      widget.call.roomId,
-      ZegoConstants.executiveStreamId(widget.call.roomId),
-    );
-
-    if (!callerEnded) {
-      await _signaling.updateCallStatus(widget.call.callId, 'ended');
+    try {
+      await ZegoService.instance.leaveRoom(
+        widget.call.roomId,
+        ZegoConstants.executiveStreamId(widget.call.roomId),
+      );
+      if (!callerEnded) {
+        await _signaling.updateCallStatus(widget.call.callId, 'ended');
+      }
+    } catch (e, stack) {
+      debugPrint('[CallScreen] _hangUp error: $e');
+      debugPrint(stack.toString());
     }
 
     if (mounted) {

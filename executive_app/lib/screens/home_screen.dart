@@ -25,18 +25,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _registerFcm() async {
-    final messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission();
-    final token = await messaging.getToken();
-    if (token != null) {
-      setState(() => _fcmToken = token);
-      await _signaling.saveExecutiveFcmToken(token);
+    try {
+      final messaging = FirebaseMessaging.instance;
+      await messaging.requestPermission();
+      final token = await messaging.getToken();
+      if (token != null) {
+        setState(() => _fcmToken = token);
+        await _signaling.saveExecutiveFcmToken(token);
+      } else {
+        debugPrint('[HomeScreen] FCM token is null');
+      }
+    } catch (e, stack) {
+      debugPrint('[HomeScreen] _registerFcm error: $e');
+      debugPrint(stack.toString());
     }
-
-    // Handle FCM foreground messages.
-    FirebaseMessaging.onMessage.listen((message) {
-      // Firestore listener already handles this case.
-    });
   }
 
   void _listenForCalls() {
@@ -45,7 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
         if (call == null || !mounted) return;
         _showIncomingCall(call);
       },
-      onError: (error) {
+      onError: (error, stack) {
+        debugPrint('[HomeScreen] watchIncomingCall error: $error');
+        debugPrint(stack.toString());
         // Retry after 5 seconds (e.g. while Firestore index is still building)
         Future.delayed(const Duration(seconds: 5), () {
           if (mounted) _listenForCalls();

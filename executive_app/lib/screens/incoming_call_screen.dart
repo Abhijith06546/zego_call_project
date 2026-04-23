@@ -29,10 +29,16 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   void _watchForCancellation() {
     _statusSub = _signaling
         .watchCallStatus(widget.call.callId)
-        .listen((status) {
-      if (!mounted) return;
-      if (status == 'ended') _returnHome();
-    });
+        .listen(
+      (status) {
+        if (!mounted) return;
+        if (status == 'ended') _returnHome();
+      },
+      onError: (e, stack) {
+        debugPrint('[IncomingCallScreen] watchForCancellation error: $e');
+        debugPrint(stack.toString());
+      },
+    );
   }
 
   Future<void> _acceptCall() async {
@@ -40,8 +46,15 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     setState(() => _processing = true);
 
     _statusSub?.cancel();
-    await ZegoService.instance.initEngine();
-    await _signaling.updateCallStatus(widget.call.callId, 'accepted');
+    try {
+      await ZegoService.instance.initEngine();
+      await _signaling.updateCallStatus(widget.call.callId, 'accepted');
+    } catch (e, stack) {
+      debugPrint('[IncomingCallScreen] _acceptCall error: $e');
+      debugPrint(stack.toString());
+      if (mounted) setState(() => _processing = false);
+      return;
+    }
 
     if (!mounted) return;
     Navigator.pushReplacement(
@@ -57,7 +70,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     setState(() => _processing = true);
 
     _statusSub?.cancel();
-    await _signaling.updateCallStatus(widget.call.callId, 'rejected');
+    try {
+      await _signaling.updateCallStatus(widget.call.callId, 'rejected');
+    } catch (e, stack) {
+      debugPrint('[IncomingCallScreen] _rejectCall error: $e');
+      debugPrint(stack.toString());
+    }
     _returnHome();
   }
 

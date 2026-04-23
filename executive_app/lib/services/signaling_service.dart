@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/call_model.dart';
 
 class SignalingService {
@@ -15,10 +16,14 @@ class SignalingService {
         .limit(1)
         .snapshots()
         .map((snap) {
-      if (snap.docs.isEmpty) return null;
-      final doc = snap.docs.first;
-      return CallModel.fromMap(doc.id, doc.data());
-    });
+          if (snap.docs.isEmpty) return null;
+          final doc = snap.docs.first;
+          return CallModel.fromMap(doc.id, doc.data());
+        })
+        .handleError((e, stack) {
+          debugPrint('[SignalingService] watchIncomingCall error: $e');
+          debugPrint(stack.toString());
+        });
   }
 
   /// Watches status changes on a specific call document.
@@ -27,26 +32,50 @@ class SignalingService {
         .collection(_callsCollection)
         .doc(callId)
         .snapshots()
-        .map((snap) => snap.data()?['status'] as String? ?? 'ended');
+        .map((snap) => snap.data()?['status'] as String? ?? 'ended')
+        .handleError((e, stack) {
+          debugPrint('[SignalingService] watchCallStatus error: $e');
+          debugPrint(stack.toString());
+        });
   }
 
   /// Updates call status (accepted / rejected / ended).
   Future<void> updateCallStatus(String callId, String status) async {
-    await _db
-        .collection(_callsCollection)
-        .doc(callId)
-        .update({'status': status});
+    try {
+      await _db
+          .collection(_callsCollection)
+          .doc(callId)
+          .update({'status': status});
+      debugPrint('[SignalingService] Call $callId status -> $status');
+    } catch (e, stack) {
+      debugPrint('[SignalingService] updateCallStatus failed: $e');
+      debugPrint(stack.toString());
+      rethrow;
+    }
   }
 
   /// Saves this device's FCM token so the web app can target it.
   Future<void> saveExecutiveFcmToken(String token) async {
-    await _db.collection('executives').doc('main').set(
-      {'fcmToken': token, 'updatedAt': FieldValue.serverTimestamp()},
-      SetOptions(merge: true),
-    );
+    try {
+      await _db.collection('executives').doc('main').set(
+        {'fcmToken': token, 'updatedAt': FieldValue.serverTimestamp()},
+        SetOptions(merge: true),
+      );
+      debugPrint('[SignalingService] FCM token saved');
+    } catch (e, stack) {
+      debugPrint('[SignalingService] saveExecutiveFcmToken failed: $e');
+      debugPrint(stack.toString());
+      rethrow;
+    }
   }
 
   Future<void> deleteCall(String callId) async {
-    await _db.collection(_callsCollection).doc(callId).delete();
+    try {
+      await _db.collection(_callsCollection).doc(callId).delete();
+      debugPrint('[SignalingService] Call deleted: $callId');
+    } catch (e, stack) {
+      debugPrint('[SignalingService] deleteCall failed: $e');
+      debugPrint(stack.toString());
+    }
   }
 }
