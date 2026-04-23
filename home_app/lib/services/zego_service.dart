@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:zego_express_engine/zego_express_engine.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import '../constants.dart';
+import '../utils/zego_token_helper.dart';
 
 class ZegoService {
   static ZegoService? _instance;
@@ -76,11 +76,14 @@ class ZegoService {
       final config = ZegoRoomConfig.defaultConfig()..isUserStatusNotify = true;
 
       if (kIsWeb) {
-        debugPrint('[ZegoService] Fetching token from Cloud Function...');
-        final callable = FirebaseFunctions.instance.httpsCallable('getZegoToken');
-        final result = await callable.call({'userId': userId, 'roomId': roomId});
-        config.token = result.data['token'] as String;
-        debugPrint('[ZegoService] Token received (length=${config.token.length})');
+        final token = generateZegoToken04(
+          appId: ZegoConstants.appId,
+          userId: userId,
+          appSignHex: ZegoConstants.appSign,
+          roomId: roomId,
+        );
+        config.token = token;
+        debugPrint('[ZegoService] Token04 generated (length=${token.length})');
       }
 
       debugPrint('[ZegoService] loginRoom — roomId: $roomId, userId: $userId, streamId: $streamId');
