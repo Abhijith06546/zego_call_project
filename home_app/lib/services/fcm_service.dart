@@ -11,6 +11,13 @@ class FcmService {
     required String roomId,
     required String callerName,
   }) async {
+    // Browsers block direct FCM HTTP calls (CORS). Firestore handles in-app
+    // detection; a server-side function would be needed for background push.
+    if (kIsWeb) {
+      debugPrint('[FcmService] Skipping FCM on web (CORS not supported)');
+      return;
+    }
+
     try {
       final doc = await FirebaseFirestore.instance
           .collection('executives')
@@ -65,10 +72,9 @@ class FcmService {
         debugPrint('[FcmService] FCM send failed: ${response.statusCode} ${response.body}');
       }
     } catch (e, stack) {
-      // FCM HTTP calls fail on web due to CORS — the executive app's Firestore
-      // listener handles in-app call detection, so this is non-fatal.
-      debugPrint('[FcmService] sendCallNotification error (non-fatal): $e');
+      debugPrint('[FcmService] sendCallNotification error: $e');
       debugPrint(stack.toString());
+      rethrow;
     }
   }
 }
